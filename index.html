@@ -17,90 +17,90 @@
       background: white;
       border-radius: 12px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-      填料: 24像素;
+      padding: 24px;
     }
-    氕 {
-      文本对齐: 中心;
-      颜色:# 2c3e50
-      上边距: 0;
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-top: 0;
     }
     .desc {
-      背景:# e8f 4 ff；
-      填料: 12像素;
-      边框半径: 8像素;
-      页边距-底部: 20像素;
-      字体大小: 14像素;
-      颜色:# 2980b9
+      background: #e8f4ff;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #2980b9;
     }
-    #零售商库存品价格表 {
-      显示: 格子;
-      缝隙: 12像素;
+    #stockList {
+      display: grid;
+      gap: 12px;
     }
-    .库存项目 {
-      显示: 弯曲;
-      填料: 12像素;
-      背景:# fff
-      边界: 1像素 固体# eee
-      边框半径: 8像素;
-      箱形阴影: 0 1像素 3像素 rgba(0,0,0,0.05);
+    .stock-item {
+      display: flex;
+      padding: 12px;
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
-    .密码 {
-      宽度: 100像素;
-      字体粗细: 大胆的;
-      颜色:# e74c3c
+    .code {
+      width: 100px;
+      font-weight: bold;
+      color: #e74c3c;
     }
-  </风格>
-</头>
-<身体>
-  <差异 班级="集装箱">
-    <氕>✨ 纯净股筛选器</氕>
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>✨ 纯净股筛选器</h1>
     <div class="desc">
       自动筛选「无任何主流机构持仓」的A股：<br>
       排除公募基金、社保、保险、券商、QFII、养老金、证金/汇金等。
     </div>
     <div id="stockList">
-      <p 风格="文本对齐:中心;颜色:#999;">正在加载最新数据...</p>
-    </差异>
-  </差异>
+      <p style="text-align:center;color:#999;">正在加载最新数据...</p>
+    </div>
+  </div>
 
-  <脚本>
-    // === 配置你的腾讯文档身份证明 ===
-    常数 文档标识 = " DVGZXT0dvUUhoT1ps "; // ← 这就是你刚才的文档ID！
+  <script>
+    // === 配置你的腾讯文档ID ===
+    const DOC_ID = "DVGZXT0dvUUhoT1ps"; // ← 这就是你刚才的文档ID！
 
-    常数 API_URL = `https://文件（documents的简写）.即时通信软件.com/dop-api/opendoc？输出格式=1&id=${文档标识}&noCache=${日期.现在()}`;
+    const API_URL = `https://docs.qq.com/dop-api/opendoc?outformat=1&id=${DOC_ID}&noCache=${Date.now()}`;
 
-    取得(API_URL)
-      .然后(表示留数 => 表示留数.json())
-      .然后(数据 => {
-        如果 (数据.密码 !== 0) 扔 新的 错误("文档读取失败");
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(data => {
+        if (data.code !== 0) throw new Error("文档读取失败");
 
-        常数 记录 = 数据.数据.记录 || [];
-        常数 股票 = 记录.地图(排 => ({
-代码:行''，代码: 排 || '',
-名称:行'—'名字: 排 || '—'
-})).filter(s = > s . 密码 . trim())；})).filter(s => s.code.trim());
+        const records = data.data.records || [];
+        const stocks = records.map(row => ({
+          code: row || '',
+          name: row || '—'
+        })).filter(s => s.code.trim());
 
-renderStocks(股票)；渲染股票(股票);
+        renderStocks(stocks);
       })
-。捕捉(犯罪 => {捕捉(犯罪 => {
-安慰.error("加载失败:"，呃)；安慰.error("加载失败:", err);
-文件 . getelementbyid('库存清单')。innerHTML =document.getElementById('stockList').innerHTML = 
-< P 风格 = “文本 对齐:居中；颜色编号:# e74c3c>⚠️ 数据加载失败,请稍后重试'；'<p style="text-align:center;color:#e74c3c;">⚠️ 数据加载失败，请稍后重试</p>';
+      .catch(err => {
+        console.error("加载失败:", err);
+        document.getElementById('stockList').innerHTML = 
+          '<p style="text-align:center;color:#e74c3c;">⚠️ 数据加载失败，请稍后重试</p>';
       });
 
-函数渲染股票(股票){功能 渲染股票(股票) {
-常数 平线脚 = 文件。使用 使用使用getelementbyid('库存清单')；const listel = 文件。getElementById(“stocklist”);
-如果 (股票.长度 === 0) {如果 (股票.长度 === 0) {
-平线脚 . innerhtml = < P风格 = "文本对齐:居中；颜色:# 999;">暂无符合条件的股票'；listEl.innerHTML = '<p style="text-align:center;color:#999;">暂无符合条件的股票</p>';
-返回；返回;
+    function renderStocks(stocks) {
+      const listEl = document.getElementById('stockList');
+      if (stocks.length === 0) {
+        listEl.innerHTML = '<p style="text-align:center;color:#999;">暂无符合条件的股票</p>';
+        return;
       }
-平线脚 . innerhtml = 股票 . 地图(股票 = >listEl.innerHTML = stocks.map(stock => 
-< 饰 差异 班级="库存项目" ><差异班级="库存项目">
-          <跨度班级="代码">${股票美元{股票.code}</span >code}</span>
-          <跨度>${股票美元{股票.名字}</跨度 >name}</span>
-        </饰 差异>`
-).联接(“”)；).加入('');
+      listEl.innerHTML = stocks.map(stock => 
+        `<div class="stock-item">
+          <span class="code">${stock.code}</span>
+          <span>${stock.name}</span>
+        </div>`
+      ).join('');
     }
-  </脚本>
-</身体>
-</超文本标记语言>
+  </script>
+</body>
+</html>
