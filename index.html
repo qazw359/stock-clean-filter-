@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>股票筛选系统 - 沪深股高级筛选</title>
+    <style>
+        /* 样式代码已包含在HTML中 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1a3a8f 0%, #2c5cc5 100%);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .stat-box {
+            text-align: center;
+            padding: 10px 20px;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            min-width: 120px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 25px;
+        }
+        
+        @media (max-width: 1100px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .filter-panel {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            height: fit-content;
+        }
+        
+        .filter-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .filter-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        h2 {
+            font-size: 20px;
+            color: #1a3a8f;
+            margin-bottom: 20px;
+        }
+        
+        .filter-row {
+            margin-bottom: 18px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+            font-size: 15px;
+        }
+        
+        .value-display {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2c5cc5;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .exclude-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .exclude-item {
+            background-color: #f0f5ff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .exclude-item.active {
+            background-color: #ffeff0;
+            color: #d32f2f;
+        }
+        
+        .btn-apply {
+            background: linear-gradient(to right, #1a3a8f, #2c5cc5);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        .btn-apply:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(42, 92, 197, 0.3);
+        }
+        
+        .results-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .results-count {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1arman3a8f;
+        }
+        
+        .export-btn {
+            background-color: #f0f5ff;
+            color: #2c5cc5;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .export-btn:hover {
+            background-color: #e1e9ff;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background-color: #f8fafd;
+        }
+        
+        th {
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #444;
+            border-bottom: 2px solid #eef1f7;
+            font-size: 15px;
+        }
+        
+        td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        
+        tr:hover {
+            background-color: #f9fbfe;
+        }
+        
+        .stock-code {
+            font-weight: 700;
+            color: #1a3a8f;
+        }
+        
+        .price.up {
+            color: #e53935;
+        }
+        
+        .price.down {
+            color: #2e7d32;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .filter-summary {
+            background-color: #f0f7ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .highlight {
+            background-color: #fff8e1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>沪深股票高级筛选系统</h1>
+            <p class="subtitle">基于多重条件筛选符合投资策略的股票</p>
+            
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-value" id="totalStocks">2,843</div>
+                    <div class="stat-label">沪深股票总数</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="filteredStocks">0</div>
+                    <div class="stat-label">筛选结果</div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="filter-summary">
+            <strong>当前筛选条件：</strong> 股价 ≤ 20元，流通市值 ≤ 500亿元，股东户数 ≤ 15万户，人均持股 ≤ 15万股，排除机构持股（公募基金、国家队、保险、社保、券商自营、养老金、QFII）
+        </div>
+        
+        <div class="main-content">
+            <div class="filter-panel">
+                <div class="filter-section">
+                    <h2>筛选条件</h2>
+                    
+                    <div class="filter-row">
+                        <label for="price">股价 (≤ <span id="priceValue">20</span> 元)</label>
+                        <input type="range" id="price" min="5" max="100" value="20" step="1">
+                        <div class="value-display">
+                            <span>5元</span>
+                            <span>100元</span>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-row">
+                        <label for="marketCap">流通市值 (≤ <span id="marketCapValue">500</span> 亿元)</label>
+                        <input type="range" id="marketCap" min="50" max="2000" value="500" step="50">
+                        <div class="value-display">
+                            <span>50亿</span>
+                            <span>2000亿</span>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-row">
+                        <label for="shareholders">股东户数 (≤ <span id="shareholdersValue">15</span> 万户)</label>
+                        <input type="range" id="shareholders" min="1" max="50" value="15" step="1">
+                        <div class="value-display">
+                            <span>1万户</span>
+                            <span>50万户</span>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-row">
+                        <label for="perCapita">人均持股 (≤ <span id="perCapitaValue">15</span> 万股)</label>
+                        <input type="range" id="perCapita" min="1" max="50" value="15" step="1">
+                        <div class="value-display">
+                            <span>1万股</span>
+                            <span>50万股</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="filter-section">
+                    <h2>排除机构类型</h2>
+                    <p style="margin-bottom: 15px; color: #666; font-size: 14px;">选择要排除的持股机构类型：</p>
+                    
+                    <div class="exclude-list">
+                        <div class="exclude-item active" data-type="fund">公募基金</div>
+                        <div class="exclude-item active" data-type="national">国家队</div>
+                        <div class="exclude-item active" data-type="insurance">保险</div>
+                        <div class="exclude-item active" data-type="social">社保</div>
+                        <div class="exclude-item active" data-type="broker">券商自营</div>
+                        <div class="exclude-item active" data-type="pension">养老金</div>
+                        <div class="exclude-item active" data-type="qfii">QFII</div>
+                    </div>
+                </div>
+                
+                <button class="btn-apply" id="applyFilters">应用筛选条件</button>
+            </div>
+            
+            <div class="results-section">
+                <div class="results-header">
+                    <div class="results-count">筛选结果：<span id="resultsCount">0</span> 只股票</div>
+                    <button class="export-btn" id="exportBtn">导出结果</button>
+                </div>
+                
+                <div id="resultsTable">
+                    <div class="no-results">
+                        <h3>暂无符合条件的股票</h3>
+                        <p>请调整筛选条件后重新筛选</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟股票数据
+        const stockData = [
+            {code: "000001", name: "平安银行", price: 15.23, marketCap: 320.5, shareholders: 8.2, perCapita: 12.3, excludedInstitutions: ["fund", "insurance"]},
+            {code: "000002", name: "万科A", price: 18.75, marketCap: 480.2, shareholders: 12.5, perCapita: 9.8, excludedInstitutions: ["fund", "social", "pension"]},
+            {code: "000333", name: "美的集团", price: 56.80, marketCap: 890.7, shareholders: 18.3, perCapita: 8.5, excludedInstitutions: ["fund", "national", "insurance", "qfii"]},
+            {code: "600036", name: "招商银行", price: 35.20, marketCap: 980.5, shareholders: 25.3, perCapita: 7.8, excludedInstitutions: ["fund", "national", "insurance", "social", "pension"]},
+            {code: "600519", name: "贵州茅台", price: 1850.00, marketCap: 23200.0, shareholders: 11.2, perCapita: 18.5, excludedInstitutions: ["fund", "national", "insurance", "social", "pension", "qfii"]},
+            {code: "000651", name: "格力电器", price: 38.90, marketCap: 520.3, shareholders: 14.8, perCapita: 11.2, excludedInstitutions: ["fund", "insurance"]},
+            {code: "300750", name: "宁德时代", price: 210.80, marketCap: 2560.9, shareholders: 9.6, perCapita: 20.3, excludedInstitutions: ["fund", "national", "insurance", "social", "pension", "qfii"]},
+            {code: "600900", name: "长江电力", price: 22.15, marketCap: 498.7, shareholders: 8.9, perCapita: 13.6, excludedInstitutions: ["insurance", "social"]},
+            {code: "601318", name: "中国平安", price: 48.30, marketCap: 1850.2, shareholders: 32.5, perCapita: 4.8, excludedInstitutions: ["fund", "national", "insurance", "social", "broker", "pension"]},
+            {code: "000725", name: "京东方A", price: 4.12, marketCap: 320.8, shareholders: 125.3, perCapita: 2.3, excludedInstitutions: ["fund", "national", "insurance", "social"]},
+            {code: "600030", name: "中信证券", price: 22.80, marketCap: 650.3, shareholders: 45.2, perCapita: 3.8, excludedInstitutions: ["fund", "broker", "insurance"]},
+            {code: "000063", name: "中兴通讯", price: 28.90, marketCap: 420.6, shareholders: 32.1, perCapita: 6.5, excludedInstitutions: ["fund", "insurance", "social"]},
+            {code: "002475", name: "立讯精密", price: 32.10, marketCap: 480.9, shareholders: 18.6, perCapita: 9.7, excludedInstitutions: ["fund", "insurance", "qfii"]},
+            {code: "300059", name: "东方财富", price: 18.20, marketCap: 285.3, shareholders: 52.8, perCapita: 2.1, excludedInstitutions: ["fund", "broker"]},
+            {code: "601888", name: "中国中免", price: 120.50, marketCap: 680.2, shareholders: 8.2, perCapita: 14.8, excludedInstitutions: ["fund", "national", "insurance", "social", "pension", "qfii"]},
+            {code: "600887", name: "伊利股份", price: 30.20, marketCap: 520.7, shareholders: 28.5, perCapita: 7.2, excludedInstitutions: ["fund", "insurance", "social"]},
+            {code: "002142", name: "宁波银行", price: 28.30, marketCap: 385.6, shareholders: 12.3, perCapita: 11.5, excludedInstitutions: ["fund", "insurance"]},
+            {code: "600276", name: "恒瑞医药", price: 45.60, marketCap: 580.3, shareholders: 15.2, perCapita: 9.8, excludedInstitutions: ["fund", "insurance", "social", "pension"]},
+            {code: "000538", name: "云南白药", price: 52.80, marketCap: 320.5, shareholders: 9.6, perCapita: 13.2, excludedInstitutions: ["fund", "insurance"]},
+            {code: "000001", name: "深科技", price: 12.30, marketCap: 85.6, shareholders: 8.5, perCapita: 14.2, excludedInstitutions: []},
+            {code: "000009", name: "中国宝安", price: 11.80, marketCap: 120.3, shareholders: 12.3, perCapita: 9.8, excludedInstitutions: []},
+            {code: "000012", name: "南玻A", price: 7.25, marketCap: 65.8, shareholders: 9.2, perCapita: 13.5, excludedInstitutions: []},
+            {code: "000016", name: "深康佳A", price: 5.60, marketCap: 45.2, shareholders: 18.5, perCapita: 8.2, excludedInstitutions: []},
+            {code: "000021", name: "深科技", price: 12.90, marketCap: 95.3, shareholders: 7.8, perCapita: 15.3, excludedInstitutions: []},
+            {code: "000027", name: "深圳能源", price: 6.85, marketCap: 150.6, shareholders: 15.2, perCapita: 9.5, excludedInstitutions: ["insurance"]},
+            {code: "000039", name: "中集集团", price: 9.20, marketCap: 180.5, shareholders: 12.8, perCapita: 11.2, excludedInstitutions: []},
+            {code: "000050", name: "深天马A", price: 8.75, marketCap: 75.3, shareholders: 10.5, perCapita: 12.8, excludedInstitutions: []},
+            {code: "000060", name: "中金岭南", price: 5.30, marketCap: 65.8, shareholders: 14.2, perCapita: 8.9, excludedInstitutions: []},
+            {code: "000062", name: "深圳华强", price: 13.20, marketCap: 85.6, shareholders: 6.8, perCapita: 16.5, excludedInstitutions: []},
+            {code: "000066", name: "中国长城", price: 11.50, marketCap: 120.8, shareholders: 15.3, perCapita: 9.2, excludedInstitutions: []}
+        ];
+
+        // 初始化变量
+        let filteredStocks = [];
+
+        // 页面加载完成后运行
+        window.onload = function() {
+            initializePage();
+            applyFilters();
+        };
+
+        // 初始化页面
+        function initializePage() {
+            // 绑定滑块事件
+            document.getElementById('price').addEventListener('input', function() {
+                document.getElementById('priceValue').textContent = this.value;
+            });
+            
+            document.getElementById('marketCap').addEventListener('input', function() {
+                document.getElementById('marketCapValue').textContent = this.value;
+            });
+            
+            document.getElementById('shareholders').addEventListener('input', function() {
+                document.getElementById('shareholdersValue').textContent = this.value;
+            });
+            
+            document.getElementById('perCapita').addEventListener('input', function() {
+                document.getElementById('perCapitaValue').textContent = this.value;
+            });
+            
+            // 绑定排除机构点击事件
+            document.querySelectorAll('.exclude-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                });
+            });
+            
+            // 绑定筛选按钮事件
+            document.getElementById('applyFilters').addEventListener('click', applyFilters);
+            
+            // 绑定导出按钮事件
+            document.getElementById('exportBtn').addEventListener('click', exportResults);
+            
+            // 更新总股票数
+            document.getElementById('totalStocks').textContent = stockData.length;
+        }
+
+        // 应用筛选条件
+        function applyFilters() {
+            // 获取筛选条件
+            const maxPrice = parseFloat(document.getElementById('price').value);
+            const maxMarketCap = parseFloat(document.getElementById('marketCap').value);
+            const maxShareholders = parseFloat(document.getElementById('shareholders').value);
+            const maxPerCapita = parseFloat(document.getElementById('perCapita').value);
+            
+            // 获取要排除的机构类型
+            const excludedInstitutions = [];
+            document.querySelectorAll('.exclude-item.active').forEach(item => {
+                excludedInstitutions.push(item.getAttribute('data-type'));
+            });
+            
+            // 筛选股票
+            filteredStocks = stockData.filter(stock => {
+                // 基本条件筛选
+                if (stock.price > maxPrice) return false;
+                if (stock.marketCap > maxMarketCap) return false;
+                if (stock.shareholders > maxShareholders) return false;
+                if (stock.perCapita > maxPerCapita) return false;
+                
+                // 排除机构条件
+                if (excludedInstitutions.length > 0) {
+                    // 如果股票被任何要排除的机构持有，则排除
+                    for (const institution of excludedInstitutions) {
+                        if (stock.excludedInstitutions.includes(institution)) {
+                            return false;
+                        }
+                    }
+                }
+                
+                return true;
+            });
+            
+            // 更新结果计数
+            document.getElementById('filteredStocks').textContent = filteredStocks.length;
+            document.getElementById('resultsCount').textContent = filteredStocks.length;
+            
+            // 显示结果
+if (filteredStocks.length === 0) {
+        }
+
+        // 显示筛选结果
+        function displayResults() {
+            const resultsDiv = document.getElementById('resultsTable');
+            
+            if (filteredStocks.length === 0) {
+                resultsDiv.innerHTML = `
+                    <div class="no-results">
+                        <h3>暂无符合条件的股票</h3>
+                        <p>请调整筛选条件后重新筛选</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 创建表格
+            let tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>股票代码</th>
+                            <th>股票名称</th>
+                            <th>股价(元)</th>
+                            <th>流通市值(亿)</th>
+                            <th>股东户数(万)</th>
+                            <th>人均持股(万)</th>
+                            <th>排除机构</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            // 添加表格行
+            filteredStocks.forEach(stock => {
+                // 判断是否高亮显示
+                const isHighlight = stock.price <= 20 && 
+                                   stock.marketCap <= 500 && 
+                                   stock.shareholders <= 15 && 
+                                   stock.perCapita <= 15;
+                
+                const highlightClass = isHighlight ? 'highlight' : '';
+                
+                // 获取排除机构的中文名称
+const institutionMap = {
+“基金”:公募基金",
+"国家": "国家队",
+“保险”:保险",
+"社交": "社保",
+                    "broker": "券商自营",
+                    "pension": "养老金",
+“QFII”:“QFII”
+                };
+                
+const excludedInstitutionsCN = stock . excludedinstitutions . map(inst = > institutionMap[inst])。join('，')；
+                
+tableHTML += `
+< tr class="${highlightClass} " >
+< TD class = " stock-code " > $ { stock。代码} </TD >
+${股票.名字}</td >
+< TD class = " price $ { stock。价格< = 20？down ':' up ' } " > $ { stock。价格。到固定(2)} </TD >
+$ {股票。市值。到固定(1)} </TD >
+$ {股票。分享者。到固定(1)} </TD >
+$ {股票。珀西皮塔饼。到固定(1)} </TD >
+${排除机构'无}</td >
+</tr >
+                `;
+            });
+            
+表格HTML += `
+</tbody >
+</表格>
+            `;
+            
+结果部门innerhtml =表格超文本标记语言
+        }
+
+        // 导出结果
+函数导出结果() {
+如果 (过滤库存.长度 === 0) {
+警报('没有可导出的数据!');
+返回；
+            }
+            
+// 创建战斗支援车内容
+让 CSV内容 = "股票代码,股票名称,股价（元),流通市值（亿),股东户数（万),人均持股（万),排除机构n”；
+            
+常数 机构地图 = {
+“基金”:公募基金",
+"国家": "国家队",
+“保险”:保险",
+"社交": "社保",
+"经纪人": "券商自营",
+"养老金"养老金",
+“QFII”:“QFII”
+            };
+            
+过滤股票foreach(stock = >{
+const excludedInstitutionsCN =股票。排除机构。map(inst = > institutionMap[inst]).联接(';'));
+CSV内容+= ` ${股票。代码}、${股票。姓名}，${股票。价格。到固定(2)}，${ stock。市值。到固定(1)}，${ stock。分享者。到固定(1)}，${ stock。人均。到固定的(1)}，${ excludedInstitutionsCN '无} n
+            });
+            
+            // 创建下载链接
+const blob = new Blob([csvContent],{ type:' text/CSV;charset = utf-8;'});
+const URL = URL。创建ObjectURL(blob);
+const link = 文件。createelement('a');
+link.href = URL
+            
+            // 生成文件名
+const today = new Date();
+const dateStr = 今天get full year()+'-'+(今天)getmonth()+1)+'-'+ heutig.getdate();
+link.download=股票筛选结果_ $ { 关于DateStr }。战斗支援车
+            
+document.body.appendChild(链接)；
+链接。单击()；
+document.body.removeChild(链接);
+            
+警报(` 1已导出${filteredStocks.length}条股票数据`);
+        }
+</script >
+</body >
+</html >
